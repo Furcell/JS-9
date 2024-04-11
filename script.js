@@ -11,32 +11,39 @@ let addOverlay = document.getElementById("add-post");
 let formEl = document.getElementById("form-post");
 
 
-
-
 function ajax(url,callback) {
-    let requist = new XMLHttpRequest();
-    requist.open("GET", url);
-    requist.addEventListener("load",function () {
-
-        let mosuliInfoJsPosts = JSON.parse(this.responseText);
-        // console.log(mosuliInfoJsPosts); // მოსული info js.
+    fetch(url,{
+        method: "GET"
+    })
+    .then(function(response) {
+        console.log(response);
+        if (response.status !== 200) {
+            throw new Error;
+        }
+        return response.json();
+    })
+    .then(function (mosuliInfoJsPosts) {
+        console.log(mosuliInfoJsPosts);
         callback(mosuliInfoJsPosts);
     })
-
-    requist.send();
 }
 
 ajax("https://jsonplaceholder.typicode.com/posts",function (data) {
-    console.log(data); //link-იდან მოსული ინფორმაცია.
+    console.log(data); 
     data.forEach(el => {
         createPost(el);
-    });
+    })
+    .catch(function (error) {
+        console.log(error);
+    })
 }); 
+
+
 
 function createPost(item) {
     let divEl = document.createElement("div");
     divEl.classList.add("post");
-    divEl.setAttribute("data-id",item.id); // data-id საშვალებით შეგვილია გავიგოთ რომელ div-ს დააჭირა user-მა
+    divEl.setAttribute("data-id",item.id); 
 
     let h3El = document.createElement("h3");
     h3El.innerText = item.id;
@@ -54,7 +61,7 @@ function createPost(item) {
     divEl.appendChild(btnDelete);
 
     btnDelete.addEventListener("click",function (e) {
-        e.stopPropagation(); // როდესაც click-მოხდება btnDelete-ღილაკზე ეს event-ი მემკვიდრეობით მშობელზე არ უნდა გადავიდეს.
+        e.stopPropagation(); 
         console.log(e.target);
         let btnId = e.target.getAttribute("data-delete-id");
         console.log(btnId);
@@ -62,22 +69,18 @@ function createPost(item) {
         console.log(btnNewUrl);
         fetch(btnNewUrl,{
             method: "DELETE",
-        }).then(( ) => divEl.remove()) // dom-იდან div-ის წაშლა.
+        }).then(( ) => divEl.remove()) 
 
-
-         // სერვერიდან წაშლის მაგალითი.
-        // .then((Response) => Response.json())
-        // .then((deletePost) => console.log(deletePost));
     });
 
     divEl.addEventListener("click",function () {
         overlayDiv.classList.add("activeOverlay");
-        let postId = this.getAttribute("data-id"); // ამოვიღოთ დაჭერილი div-ის data-id-ის მნიშვნელობა და შევინახოთ postId-ცვლადში.
+        let postId = this.getAttribute("data-id"); 
         console.log("divId =", postId);
-        let urlNew = `https://jsonplaceholder.typicode.com/posts/${postId}`; // დაჭერილი div-ის data-id-ის მნიშვნელობას ვუმაგრებთ link-ს.
+        let urlNew = `https://jsonplaceholder.typicode.com/posts/${postId}`; 
         console.log(urlNew);
         ajax(urlNew,function (mosulidata) {
-            console.log(mosulidata); // ერთი მოსული ობიექტი.
+            console.log(mosulidata); 
             let p = document.createElement("p");
             p.innerText = mosulidata.body;
 
@@ -97,13 +100,11 @@ closeIcon.addEventListener("click",function () {
 // პოსტის დამატება 
 addIcon.addEventListener("click",function () {
     addOverlay.classList.add("addActive");
-    document.getElementById("title").value = " "; // input-ის წაშლა ღილაკზე დაჭერის შემდეგ.
+    document.getElementById("title").value = " "; 
 })
 
 formEl.addEventListener("submit",function (e){
-    e.preventDefault();     //auto-refresh-ის გამორთვა.
-    // console.log(this); // this-ის მნიშვნელობა ხდება მთლიანი ფორმა.
-    // console.log(e.target[0].value);
+    e.preventDefault();   
 
     let dataNewPost = {
         title:e.target[0].value,
@@ -123,7 +124,7 @@ fetch('https://jsonplaceholder.typicode.com/posts', {
 })
   .then((response) => response.json())
   .then((createdNewObject) => {
-    createPost(createdNewObject); // 101-ე პოსტის შექმნა dom-ში.
+    createPost(createdNewObject); 
     addOverlay.classList.remove("addActive");
     console.log(createdNewObject)
 });
